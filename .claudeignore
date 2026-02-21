@@ -1,0 +1,22 @@
+# Heavy data directories
+aira-dojo/data/
+aira-dojo/logs/
+aira-dojo/outputs/
+aira-dojo/sif/
+science-codeevolve/science-codeevolve-experiments/
+
+# Vendored/external code (nested git repos)
+external/
+aira-dojo/src/dojo/tasks/mlebench/mle-bench/
+
+# Projects not actively developed
+Automated-AI-Researcher/
+aideml/
+omni-epic/
+
+# Experiment run artifacts
+experiments/*/runs/
+experiments/*/data/
+
+# Tool state
+.opencode/
