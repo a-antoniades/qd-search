@@ -3,6 +3,8 @@ aira-dojo/data/
 aira-dojo/logs/
 aira-dojo/outputs/
 aira-dojo/sif/
+Automated-AI-Researcher/data/
+Automated-AI-Researcher/runs/
 science-codeevolve/science-codeevolve-experiments/
 experiments/*/runs/
 experiments/*/data/

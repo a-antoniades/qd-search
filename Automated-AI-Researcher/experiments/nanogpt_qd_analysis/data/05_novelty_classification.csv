@@ -1,0 +1,76 @@
+concept,concept_key,count,component,novelty_score,novelty_label,paper,arxiv,year,note,best_val_loss
+SwiGLU MLP,swiglu_mlp,7,MLP / Activation,1,Known,"Shazeer 2020, GLU Variants Improve Transformer",2002.05202,2020,"SiLU-gated linear unit; used in LLaMA, PaLM",3.7007
+Fused AdamW,fused_adamw,6,Optimizer,1,Known,NVIDIA Apex / PyTorch fused optimizer implementation,,2019,Fused CUDA kernel for AdamW; systems optimization,3.7
+Learnable RMSNorm,learnable_rmsnorm,5,Normalization,1,Known,"Zhang & Sennrich 2019, Root Mean Square Layer Normalization",1910.07467,2019,RMSNorm with learnable gain is the standard implementation,3.6976
+QK-Norm,qk_norm,5,Normalization,1,Known,"Dehghani et al. 2023, Scaling ViT to 22B; Henry et al. 2020",2302.05442,2023,RMSNorm on Q and K before attention,3.7139
+Zero-Init Projections,zero_init_projections,5,Init / Architecture,1,Known,"Radford et al. 2019, GPT-2 (scales output projections to 0)",,2019,Zero-init residual projections for stable training,3.7172
+Rotary Positional Embeddings (RoPE),rope,4,Attention,1,Known,"Su et al. 2021, RoFormer: Enhanced Transformer with Rotary Position Embedding",2104.09864,2021,"Rotary position embeddings; standard in LLaMA, Mistral, etc.",3.69
+Exclude from Weight Decay,exclude_from_weight_decay,4,Embedding,1,Known,Loshchilov & Hutter 2019; standard practice for norm/bias params,1711.05101,2019,Exclude normalization/bias parameters from weight decay,3.7008
+Embedding Normalization,embedding_normalization,4,Normalization,1,Known,Various Transformer variants apply normalization to embeddings,,2020,LayerNorm/RMSNorm on embedding output,3.7392
+AdamW Beta2 Tuning,adamw_beta2_tuning,3,Optimizer,1,Known,"Loshchilov & Hutter 2019, Decoupled Weight Decay (hyperparameter tuning)",1711.05101,2019,Standard hyperparameter tuning of beta2,3.6971
+Vocabulary Padding (50304),vocab_padding,3,Embedding,1,Known,Standard GPU optimization (align vocab size to power of 2 or 64-multiple),,2020,Padding vocab from 50257 to 50304 for GPU alignment,3.6974
+Output Logit Scaling,output_logit_scaling,3,Init / Architecture,1,Known,Related to muP (Yang et al. 2022); logit scaling for stable training,2203.03466,2022,Scaling output logits for training stability,3.7007
+Attention Logit Soft-Capping,attention_logit_softcapping,3,Attention,1,Known,"Gemma 2 Team 2024, Gemma 2",2408.00118,2024,Tanh-based soft capping of attention logits,3.7053
+AdamW Beta1 Tuning,adamw_beta1_tuning,3,Optimizer,1,Known,"Loshchilov & Hutter 2019, Decoupled Weight Decay (hyperparameter tuning)",1711.05101,2019,Standard hyperparameter tuning of beta1,3.7121
+Sinusoidal Positional Embeddings,sinusoidal_positional,3,Positional Encoding,1,Known,"Vaswani et al. 2017, Attention Is All You Need",1706.03762,2017,Original sinusoidal positional encoding,4.2364
+Reduced Weight Decay,reduced_weight_decay,2,Optimizer,1,Known,"Loshchilov & Hutter 2019, Decoupled Weight Decay (hyperparameter tuning)",1711.05101,2019,Reducing weight decay from default value,3.704
+Batch Size Tuning,batch_size_tuning,2,Init / Architecture,1,Known,"Standard hyperparameter; Smith et al. 2018, Don't Decay the Learning Rate",1711.00489,2018,Adjusting batch size for training,3.7113
+WSD Schedule,wsd_schedule,2,LR Schedule,1,Known,Warmup-Stable-Decay; used in Chinchilla (Hoffmann et al. 2022),2203.15556,2022,"Three-phase LR schedule: warmup, stable, decay",3.7122
+Residual Scaling,residual_scaling,2,MLP / Activation,1,Known,"Various; T5 (Raffel et al. 2020), DeepNet (Wang et al. 2022)",2203.00555,2022,Scaling residual connections by 1/sqrt(N) or similar,3.7149
+ReLU Activation,relu_activation,2,MLP / Activation,1,Known,"Nair & Hinton 2010, Rectified Linear Units",,2010,"Standard ReLU, the original deep learning activation",3.7297
+Residual Dropout,residual_dropout,2,Normalization,1,Known,"Vaswani et al. 2017, Attention Is All You Need",1706.03762,2017,Dropout on residual connections; standard Transformer component,3.7424
+Embedding Scaling,embedding_scaling,2,Positional Encoding,1,Known,Vaswani et al. 2017 scales embeddings by sqrt(d_model),1706.03762,2017,Scaling embedding vectors,3.7621
+Parallel Blocks,parallel_blocks,2,Normalization,1,Known,"Wang & Komatsuzaki 2021, GPT-J-6B",,2021,Parallel attention and MLP sublayers,3.763
+SiLU Activation,silu_activation,2,MLP / Activation,1,Known,Elfwing et al. 2018; Ramachandran et al. 2017 (Swish),1710.05941,2017,SiLU/Swish activation function,3.7749
+Polynomial LR Decay,polynomial_lr_decay,1,LR Schedule,1,Known,Standard LR schedule; used in BERT (Devlin et al. 2019),1810.04805,2019,Polynomial learning rate decay schedule,3.6924
+Add Learnable Scale To Rmsnorm,add learnable scale to rmsnorm,1,Normalization,1,Known,"Zhang & Sennrich 2019, RMSNorm (learnable gain is standard)",1910.07467,2019,Adding learnable scale to RMSNorm; this IS standard RMSNorm,3.6932
+Foreach AdamW,foreach_adamw,1,Optimizer,1,Known,PyTorch foreach optimizer implementation,,2021,Multi-tensor foreach implementation of AdamW,3.7019
+Inverse Sqrt Schedule,inverse_sqrt_schedule,1,LR Schedule,1,Known,"Vaswani et al. 2017, Attention Is All You Need",1706.03762,2017,Original Transformer LR schedule,3.7051
+Grouped Query Attention,grouped query attention,1,Attention,1,Known,"Ainslie et al. 2023, GQA: Training Generalized Multi-Query Transformers",2305.13245,2023,Groups of query heads share KV heads,3.7052
+Disable Gradient Clipping,disable_gradient_clipping,1,Init / Architecture,2,Known-variant,Architectural choice; Pascanu et al. 2013 introduced gradient clipping,1211.5063,2013,Disabling gradient clipping; variant of standard practice,3.7065
+Gradient Clipping by Value,gradient_clipping_by_value,1,Init / Architecture,1,Known,"Pascanu et al. 2013, On the Difficulty of Training Recurrent Neural Networks",1211.5063,2013,Clip gradients by value instead of norm,3.7071
+Xavier Uniform Initialization,xavier uniform initialization,1,Init / Architecture,1,Known,"Glorot & Bengio 2010, Understanding Difficulty of Training DNNs",,2010,Xavier/Glorot uniform initialization,3.7085
+Input Jitter,input jitter,1,Init / Architecture,2,Known-variant,Known regularization; related to noise injection techniques,,2015,Adding jitter/noise to inputs; less common for Transformers,3.7087
+GPT-2 Initialization,gpt2_initialization,1,Init / Architecture,1,Known,"Radford et al. 2019, Language Models are Unsupervised Multitask Learners",,2019,GPT-2 initialization scheme (normal with scaled residual),3.7103
+Embedding Dropout,embedding_dropout,1,Positional Encoding,1,Known,Standard regularization technique,,2014,Dropout applied to embedding layer,3.7107
+"Fewer Heads, Larger Dim",fewer_heads,1,Attention,1,Known,"Michel et al. 2019, Are Sixteen Heads Really Better than One?",1905.10650,2019,Fewer attention heads with larger head dimension,3.7125
+Squared ReLU,squared_relu,1,MLP / Activation,1,Known,"So et al. 2021, Primer: Searching for Efficient Transformers",2109.08668,2021,ReLU squared activation,3.7133
+Learnable Attention Temperature,learnable_attention_temperature,1,Attention,1,Known,Related to Martins & Astudillo 2016; used in various Transformers,,2016,Learnable temperature scaling on attention logits,3.7133
+Token Shifting,token shifting,1,Init / Architecture,2,Known-variant,"Lin et al. 2019, TSM: Temporal Shift Module (adapted for sequences)",1811.08383,2019,Shifting token positions for cross-position mixing,3.7156
+Orthogonal Initialization,orthogonal initialization,1,MLP / Activation,1,Known,"Saxe et al. 2013, Exact Solutions to the Nonlinear Dynamics of Learning",1312.6120,2013,Orthogonal weight initialization,3.7185
+Attention Dropout,attention_dropout,1,Attention,1,Known,"Vaswani et al. 2017, Attention Is All You Need",1706.03762,2017,Standard dropout on attention weights,3.7207
+Untied Embedding Weights,untied_weights,1,Positional Encoding,1,Known,Press & Wolf 2017 studied weight tying; untying is architectural choice,1608.05859,2017,Separate input embedding and output projection weights,3.7214
+Bias in QKV Projections,bias_in_qkv,1,Attention,1,Known,"Radford et al. 2019, GPT-2 (uses bias in attention projections)",,2019,"Standard architectural option; GPT-2 used bias, GPT-3+ removed it",3.7219
+Tanh Approximation For Gelu,tanh approximation for gelu,1,MLP / Activation,1,Known,"Hendrycks & Gimpel 2016, GELU (tanh approximation)",1606.08415,2016,Standard tanh-based GELU approximation used in GPT-2,3.7229
+AdamW Betas Tuning,adamw_betas_tuning,1,Optimizer,1,Known,"Loshchilov & Hutter 2019, Decoupled Weight Decay (hyperparameter tuning)",1711.05101,2019,Joint tuning of beta1 and beta2,3.7236
+Fast Gelu,fast gelu,1,MLP / Activation,2,Known-variant,"Hendrycks & Gimpel 2016, GELU (approximate variant)",1606.08415,2016,Faster approximate GELU implementation,3.7238
+Standard LayerNorm,standard_layernorm,1,Normalization,1,Known,"Ba et al. 2016, Layer Normalization",1607.06450,2016,"Original LayerNorm, replacing RMSNorm",3.7242
+Enable TF32,enable_tf32,1,Init / Architecture,1,Known,NVIDIA Ampere TF32 format (hardware feature),,2020,Enable TensorFloat-32 for A100 GPUs,3.7245
+ReGLU MLP,reglu_mlp,1,MLP / Activation,1,Known,"Shazeer 2020, GLU Variants Improve Transformer",2002.05202,2020,ReLU-gated linear unit,3.7266
+Re-introduce Linear Biases,reintroduce_linear_biases,1,Attention,2,Known-variant,GPT-2 used biases; GPT-3+ removed them. Re-introducing is a variant.,,2019,Re-adding bias terms that were removed for efficiency,3.7323
+Z-Loss Regularization,z-loss regularization,1,Init / Architecture,1,Known,"Chowdhery et al. 2022, PaLM: Scaling Language Modeling with Pathways",2204.02311,2022,Auxiliary z-loss for training stability,3.7337
+Extended Warmup,extended_warmup,1,LR Schedule,1,Known,Standard hyperparameter tuning (longer warmup period),,2017,Increasing warmup steps; standard practice,3.7352
+Sandwich Norm,sandwich_norm,1,Normalization,1,Known,"Ding et al. 2021, CogView",2105.13290,2021,Pre- and post-normalization in each sublayer,3.7373
+Enable Bias In Lm Head,enable bias in lm head,1,Init / Architecture,2,Known-variant,Standard architectural choice,,2019,Adding bias to language model head; architectural variant,3.7404
+RMSNorm with Bias,rmsnorm_with_bias,1,Normalization,2,Known-variant,"Zhang & Sennrich 2019, RMSNorm (variant with bias)",1910.07467,2019,Standard RMSNorm omits bias; adding it is a minor variant,3.7406
+Increase Learning Rate To E-,increase learning rate to e-,1,Init / Architecture,1,Known,Standard hyperparameter tuning,,2017,Adjusting peak learning rate,3.751
+Scale Input Embeddings,scale input embeddings,1,Positional Encoding,1,Known,"Vaswani et al. 2017, Attention Is All You Need",1706.03762,2017,Multiply embeddings by sqrt(d_model),3.7554
+Head-wise RMSNorm (NormFormer),normformer_headwise_rmsnorm,1,Normalization,1,Known,"Shleifer et al. 2021, NormFormer",2110.09456,2021,Per-head normalization in attention,3.7563
+LayerScale,layerscale,1,Normalization,1,Known,"Touvron et al. 2021, Going Deeper with Image Transformers (CaiT)",2103.17239,2021,Per-layer learnable scaling of residual connections,3.76
+Mish Activation,mish activation,1,MLP / Activation,1,Known,"Misra 2019, Mish: A Self Regularized Non-Monotonic Activation",1908.08681,2019,Self-regularized smooth activation function,3.7614
+Scale Embeddings By $\Sqrt{D {Model}}$,scale embeddings by $\sqrt{d_{model}}$,1,Embedding,1,Known,"Vaswani et al. 2017, Attention Is All You Need",1706.03762,2017,Standard Transformer embedding scaling,3.7677
+Small Initialization,small_initialization,1,Init / Architecture,1,Known,Various; small init for stability is well-known,,2015,"Smaller initialization scale (e.g., std=0.01)",3.7702
+Droppath,droppath,1,Normalization,1,Known,"Huang et al. 2016, Deep Networks with Stochastic Depth",1603.09382,2016,Stochastic depth / DropPath regularization,3.7707
+Post-Ln Architecture,post-ln architecture,1,Normalization,1,Known,"Xiong et al. 2020, On Layer Normalization in the Transformer Architecture",2002.04745,2020,Post-LayerNorm (original Transformer) vs Pre-LN,3.7732
+Amsgrad Optimizer,amsgrad optimizer,1,Optimizer,1,Known,"Reddi et al. 2018, On the Convergence of Adam and Beyond",1904.09237,2018,AMSGrad variant of Adam optimizer,3.7736
+Remove Residual Scaling,remove_residual_scaling,1,Positional Encoding,2,Known-variant,Architectural choice (removing pre-existing scaling),,2022,Removing residual scaling factor; variant of known technique,3.7755
+Expanded Value Head,expanded_value_head,1,Attention,2,Known-variant,Common architectural choice in various Transformer variants,,2020,Larger value projection dimension; not tied to a single paper,3.7802
+Attention Logit Hard-Capping,attention_logit_hardcapping,1,Attention,2,Known-variant,Variant of soft-capping; clamp-based,,2024,"Hard clamp variant of logit capping, less common than soft",3.8012
+AdamW Epsilon Tuning,adamw_epsilon_tuning,1,Optimizer,1,Known,"Loshchilov & Hutter 2019, Decoupled Weight Decay (hyperparameter tuning)",1711.05101,2019,Tuning epsilon for numerical stability,3.8045
+Label Smoothing,label smoothing,1,Init / Architecture,1,Known,"Szegedy et al. 2016, Rethinking the Inception Architecture",1512.00567,2016,Standard label smoothing regularization,3.8198
+Separate Embedding Learning Rate,separate_embedding_lr,1,Embedding,2,Known-variant,Known hyperparameter tuning practice,,2018,Different learning rate for embedding layer; less commonly published,3.832
+Softmax Attention,softmax attention,1,Attention,1,Known,"Vaswani et al. 2017, Attention Is All You Need",1706.03762,2017,Standard softmax attention (baseline Transformer),3.8528
+Multi-Query Attention,multi_query_attention,1,Attention,1,Known,"Shazeer 2019, Fast Transformer Decoding",1911.02150,2019,Single KV head shared across query heads,3.952
+Elu Activation,elu activation,1,MLP / Activation,1,Known,"Clevert et al. 2015, Fast and Accurate Deep Network Learning by ELU",1511.07289,2015,Exponential Linear Unit,3.9821
+Scalenorm,scalenorm,1,Normalization,1,Known,"Nguyen & Salazar 2019, Transformers without Tears",1910.05895,2019,Simplified normalization using scalar scaling,
+Radam Optimizer,radam optimizer,1,Optimizer,1,Known,"Liu et al. 2020, On the Variance of the Adaptive Learning Rate and Beyond",1908.03265,2020,Rectified Adam optimizer,

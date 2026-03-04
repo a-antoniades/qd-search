@@ -1,0 +1,9 @@
+component,idea_count,unique_concepts,best_val_loss,mean_val_loss,top_concept
+Normalization,30,18,3.6932,3.733362068965518,Add Learnable Scale To Rmsnorm
+Attention,21,14,3.69,3.7533904761904764,Rotary Positional Embeddings (RoPE)
+MLP / Activation,24,15,3.7007,3.744475,SwiGLU MLP
+Positional Encoding,18,10,3.69,3.870666666666667,Rotary Positional Embeddings (RoPE)
+Embedding,12,8,3.6974,3.732918181818182,Vocabulary Padding (50304)
+Optimizer,24,11,3.6971,3.7248043478260873,AdamW Beta2 Tuning
+LR Schedule,5,4,3.6924,3.7138799999999996,Polynomial LR Decay
+Init / Architecture,49,31,3.7007,3.737768085106382,SwiGLU MLP

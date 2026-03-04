@@ -1,0 +1,76 @@
+rank,concept,count,epochs,components,best_val_loss,mean_val_loss
+1,Rotary Positional Embeddings (RoPE),4,"1, 3, 5, 6","Attention, Positional Encoding",3.69,3.697
+2,Polynomial LR Decay,1,2,LR Schedule,3.6924,3.6924
+3,Add Learnable Scale To Rmsnorm,1,5,Normalization,3.6932,3.6932
+4,AdamW Beta2 Tuning,3,"0, 3, 6","Init / Architecture, Optimizer",3.6971,3.7015333333333333
+5,Vocabulary Padding (50304),3,"0, 1, 5",Embedding,3.6974,3.705933333333333
+6,Learnable RMSNorm,5,"0, 1, 3, 4, 6",Normalization,3.6976,3.7102199999999996
+7,Fused AdamW,6,"1, 2, 3, 4, 5, 6","Normalization, Optimizer, Positional Encoding",3.7,3.714866666666667
+8,SwiGLU MLP,7,"0, 1, 2, 3, 4, 5, 6","Init / Architecture, MLP / Activation",3.7007,3.7182285714285714
+9,Output Logit Scaling,3,"3, 4, 7",Init / Architecture,3.7007,3.70395
+10,Exclude from Weight Decay,4,"0, 1, 5","Embedding, Normalization, Optimizer",3.7008,3.705275
+11,Foreach AdamW,1,1,Optimizer,3.7019,3.7019
+12,Reduced Weight Decay,2,"2, 6","Normalization, Optimizer",3.704,3.70895
+13,Inverse Sqrt Schedule,1,4,LR Schedule,3.7051,3.7051
+14,Grouped Query Attention,1,5,Attention,3.7052,3.7052
+15,Attention Logit Soft-Capping,3,"0, 1, 4","Attention, Init / Architecture",3.7053,3.774033333333333
+16,Disable Gradient Clipping,1,2,Init / Architecture,3.7065,3.7065
+17,Gradient Clipping by Value,1,3,Init / Architecture,3.7071,3.7071
+18,Xavier Uniform Initialization,1,6,Init / Architecture,3.7085,3.7085
+19,Input Jitter,1,6,Init / Architecture,3.7087,3.7087
+20,GPT-2 Initialization,1,1,Init / Architecture,3.7103,3.7103
+21,Embedding Dropout,1,3,"Embedding, Positional Encoding",3.7107,3.7107
+22,Batch Size Tuning,2,"2, 3",Init / Architecture,3.7113,3.716
+23,AdamW Beta1 Tuning,3,"2, 4, 6",Optimizer,3.7121,3.734033333333333
+24,WSD Schedule,2,"1, 3",LR Schedule,3.7122,3.71835
+25,"Fewer Heads, Larger Dim",1,4,Attention,3.7125,3.7125
+26,Squared ReLU,1,0,MLP / Activation,3.7133,3.7133
+27,Learnable Attention Temperature,1,1,Attention,3.7133,3.7133
+28,QK-Norm,5,"0, 1, 2, 4, 5","Attention, Normalization",3.7139,3.72904
+29,Residual Scaling,2,"0, 1","Init / Architecture, MLP / Activation, Normalization",3.7149,3.7155500000000004
+30,Token Shifting,1,6,Init / Architecture,3.7156,3.7156
+31,Zero-Init Projections,5,"0, 1, 2, 3, 5","Init / Architecture, MLP / Activation",3.7172,3.7225200000000003
+32,Orthogonal Initialization,1,5,"Init / Architecture, MLP / Activation",3.7185,3.7185
+33,Attention Dropout,1,0,Attention,3.7207,3.7207
+34,Untied Embedding Weights,1,0,"Embedding, Positional Encoding",3.7214,3.7214
+35,Bias in QKV Projections,1,3,"Attention, Init / Architecture",3.7219,3.7219
+36,Tanh Approximation For Gelu,1,7,MLP / Activation,3.7229,3.7229
+37,AdamW Betas Tuning,1,3,Optimizer,3.7236,3.7236
+38,Fast Gelu,1,5,MLP / Activation,3.7238,3.7238
+39,Standard LayerNorm,1,3,Normalization,3.7242,3.7242
+40,Enable TF32,1,1,Init / Architecture,3.7245,3.7245
+41,ReGLU MLP,1,4,"Init / Architecture, MLP / Activation",3.7266,3.7266
+42,ReLU Activation,2,"2, 5",MLP / Activation,3.7297,3.7405
+43,Re-introduce Linear Biases,1,1,"Attention, Init / Architecture",3.7323,3.7323
+44,Z-Loss Regularization,1,7,Init / Architecture,3.7337,3.7337
+45,Extended Warmup,1,3,LR Schedule,3.7352,3.7352
+46,Sandwich Norm,1,4,Normalization,3.7373,3.7373
+47,Embedding Normalization,4,"0, 1, 2, 4","Embedding, Normalization, Positional Encoding",3.7392,3.74905
+48,Enable Bias In Lm Head,1,6,Init / Architecture,3.7404,3.7404
+49,RMSNorm with Bias,1,2,Normalization,3.7406,3.7406
+50,Residual Dropout,2,"0, 7","Init / Architecture, MLP / Activation, Normalization",3.7424,3.7459
+51,Increase Learning Rate To E-,1,6,Init / Architecture,3.751,3.751
+52,Scale Input Embeddings,1,6,Positional Encoding,3.7554,3.7554
+53,Head-wise RMSNorm (NormFormer),1,4,"Attention, Init / Architecture, Normalization",3.7563,3.7563
+54,LayerScale,1,2,"Init / Architecture, MLP / Activation, Normalization",3.76,3.76
+55,Mish Activation,1,5,MLP / Activation,3.7614,3.7614
+56,Embedding Scaling,2,"0, 7","Embedding, Init / Architecture, Positional Encoding",3.7621,3.7621
+57,Parallel Blocks,2,"0, 2","Init / Architecture, Normalization",3.763,3.76355
+58,Scale Embeddings By $\Sqrt{D {Model}}$,1,5,Embedding,3.7677,3.7677
+59,Small Initialization,1,4,Init / Architecture,3.7702,3.7702
+60,Droppath,1,7,"MLP / Activation, Normalization",3.7707,3.7707
+61,Post-Ln Architecture,1,5,"Normalization, Positional Encoding",3.7732,3.7732
+62,Amsgrad Optimizer,1,6,Optimizer,3.7736,3.7736
+63,SiLU Activation,2,"0, 6",MLP / Activation,3.7749,3.7845500000000003
+64,Remove Residual Scaling,1,4,"Init / Architecture, Positional Encoding",3.7755,3.7755
+65,Expanded Value Head,1,1,"Attention, Init / Architecture",3.7802,3.7802
+66,Attention Logit Hard-Capping,1,2,Attention,3.8012,3.8012
+67,AdamW Epsilon Tuning,1,0,Optimizer,3.8045,3.8045
+68,Label Smoothing,1,7,Init / Architecture,3.8198,3.8198
+69,Separate Embedding Learning Rate,1,4,"Embedding, Optimizer",3.832,3.832
+70,Softmax Attention,1,5,Attention,3.8528,3.8528
+71,Multi-Query Attention,1,0,"Attention, Init / Architecture",3.952,3.952
+72,Elu Activation,1,6,MLP / Activation,3.9821,3.9821
+73,Sinusoidal Positional Embeddings,3,"1, 2, 6",Positional Encoding,4.2364,4.5522
+74,Scalenorm,1,5,Normalization,,
+75,Radam Optimizer,1,7,Optimizer,,

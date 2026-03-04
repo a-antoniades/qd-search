@@ -1,0 +1,76 @@
+concept,num_instances,num_diffs,mean_added_lines,mean_removed_lines,mean_diff_size,intra_concept_similarity,implementation_consistency
+AdamW Beta1 Tuning,3,3,1.0,1.0,2.0,0.458,moderate
+AdamW Beta2 Tuning,3,3,1.0,1.0,2.0,0.446,moderate
+AdamW Betas Tuning,1,1,1.0,1.0,2.0,1.0,single_instance
+AdamW Epsilon Tuning,1,1,1.0,1.0,2.0,1.0,single_instance
+Add Learnable Scale To Rmsnorm,1,1,17.0,9.0,26.0,1.0,single_instance
+Amsgrad Optimizer,1,1,1.0,1.0,2.0,1.0,single_instance
+Attention Dropout,1,1,2.0,1.0,3.0,1.0,single_instance
+Attention Logit Hard-Capping,1,1,5.0,1.0,6.0,1.0,single_instance
+Attention Logit Soft-Capping,3,3,7.3,3.3,10.7,0.189,low
+Batch Size Tuning,2,2,1.0,1.0,2.0,0.188,low
+Bias in QKV Projections,1,1,1.0,1.0,2.0,1.0,single_instance
+Disable Gradient Clipping,1,1,3.0,2.0,5.0,1.0,single_instance
+Droppath,1,1,9.0,2.0,11.0,1.0,single_instance
+Elu Activation,1,1,1.0,1.0,2.0,1.0,single_instance
+Embedding Dropout,1,1,2.0,0.0,2.0,1.0,single_instance
+Embedding Normalization,4,4,6.2,0.2,6.5,0.469,moderate
+Embedding Scaling,2,2,1.5,1.5,3.0,0.067,low
+Enable Bias In Lm Head,1,1,3.0,1.0,4.0,1.0,single_instance
+Enable TF32,1,1,2.0,0.0,2.0,1.0,single_instance
+Exclude from Weight Decay,4,4,13.0,1.2,14.2,0.498,moderate
+Expanded Value Head,1,1,5.0,5.0,10.0,1.0,single_instance
+Extended Warmup,1,1,1.0,1.0,2.0,1.0,single_instance
+Fast Gelu,1,1,1.0,1.0,2.0,1.0,single_instance
+"Fewer Heads, Larger Dim",1,1,1.0,1.0,2.0,1.0,single_instance
+Foreach AdamW,1,1,1.0,1.0,2.0,1.0,single_instance
+Fused AdamW,6,6,5.5,1.0,6.5,0.533,moderate
+GPT-2 Initialization,1,1,6.0,3.0,9.0,1.0,single_instance
+Gradient Clipping by Value,1,1,2.0,1.0,3.0,1.0,single_instance
+Grouped Query Attention,1,1,10.0,5.0,15.0,1.0,single_instance
+Head-wise RMSNorm (NormFormer),1,1,8.0,0.0,8.0,1.0,single_instance
+Increase Learning Rate To E-,1,1,1.0,1.0,2.0,1.0,single_instance
+Input Jitter,1,1,2.0,0.0,2.0,1.0,single_instance
+Inverse Sqrt Schedule,1,1,7.0,10.0,17.0,1.0,single_instance
+Label Smoothing,1,1,4.0,1.0,5.0,1.0,single_instance
+LayerScale,1,1,4.0,2.0,6.0,1.0,single_instance
+Learnable Attention Temperature,1,1,3.0,0.0,3.0,1.0,single_instance
+Learnable RMSNorm,5,5,14.2,7.6,21.8,0.585,moderate
+Mish Activation,1,1,1.0,1.0,2.0,1.0,single_instance
+Multi-Query Attention,1,1,6.0,5.0,11.0,1.0,single_instance
+Orthogonal Initialization,1,1,7.0,3.0,10.0,1.0,single_instance
+Output Logit Scaling,3,3,2.0,0.3,2.3,0.367,low
+Parallel Blocks,2,2,2.0,2.0,4.0,1.0,high
+Polynomial LR Decay,1,1,4.0,4.0,8.0,1.0,single_instance
+Post-Ln Architecture,1,1,6.0,3.0,9.0,1.0,single_instance
+QK-Norm,5,5,7.2,0.0,7.2,0.353,low
+RMSNorm with Bias,1,1,6.0,3.0,9.0,1.0,single_instance
+Radam Optimizer,1,1,1.0,1.0,2.0,1.0,single_instance
+Re-introduce Linear Biases,1,1,4.0,4.0,8.0,1.0,single_instance
+ReGLU MLP,1,1,7.0,7.0,14.0,1.0,single_instance
+ReLU Activation,2,2,1.0,1.0,2.0,0.0,low
+Reduced Weight Decay,2,2,12.5,1.0,13.5,0.013,low
+Remove Residual Scaling,1,1,0.0,1.0,1.0,1.0,single_instance
+Residual Dropout,2,2,3.0,2.0,5.0,0.714,high
+Residual Scaling,2,2,4.0,1.5,5.5,0.143,low
+Rotary Positional Embeddings (RoPE),4,4,20.8,5.0,25.8,0.267,low
+Sandwich Norm,1,1,7.0,0.0,7.0,1.0,single_instance
+Scale Embeddings By $\Sqrt{D {Model}}$,1,1,1.0,0.0,1.0,1.0,single_instance
+Scale Input Embeddings,1,1,1.0,1.0,2.0,1.0,single_instance
+Scalenorm,1,1,16.0,10.0,26.0,1.0,single_instance
+Separate Embedding Learning Rate,1,1,15.0,2.0,17.0,1.0,single_instance
+SiLU Activation,2,2,1.0,1.0,2.0,0.0,low
+Sinusoidal Positional Embeddings,3,3,7.7,0.7,8.3,0.557,moderate
+Small Initialization,1,1,7.0,3.0,10.0,1.0,single_instance
+Softmax Attention,1,1,7.0,1.0,8.0,1.0,single_instance
+Squared ReLU,1,1,1.0,1.0,2.0,1.0,single_instance
+Standard LayerNorm,1,1,6.0,7.0,13.0,1.0,single_instance
+SwiGLU MLP,7,7,4.3,3.3,7.6,0.437,moderate
+Tanh Approximation For Gelu,1,1,1.0,1.0,2.0,1.0,single_instance
+Token Shifting,1,1,3.0,0.0,3.0,1.0,single_instance
+Untied Embedding Weights,1,1,0.0,2.0,2.0,1.0,single_instance
+Vocabulary Padding (50304),3,3,5.0,5.0,10.0,1.0,high
+WSD Schedule,2,2,14.5,10.0,24.5,0.686,moderate
+Xavier Uniform Initialization,1,1,5.0,1.0,6.0,1.0,single_instance
+Z-Loss Regularization,1,1,3.0,0.0,3.0,1.0,single_instance
+Zero-Init Projections,5,5,4.0,0.2,4.2,0.269,low
