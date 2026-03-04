@@ -68,7 +68,9 @@ def cvt(
             if centroid2points[j]:
                 centroids[j] = np.mean(points[centroid2points[j], :], axis=0)
 
-        centroid_shift: float = np.max(np.linalg.norm(centroids - prev_centroids, axis=1))
+        centroid_shift: float = np.max(
+            np.linalg.norm(centroids - prev_centroids, axis=1)
+        )
         if centroid_shift < tolerance:
             return centroids
 

@@ -23,6 +23,7 @@ from qd import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def grid_features() -> list[Feature]:
     return [
@@ -39,6 +40,7 @@ def grid(grid_features) -> GridArchive:
 # ---------------------------------------------------------------------------
 # GridArchive
 # ---------------------------------------------------------------------------
+
 
 class TestGridArchive:
     def test_cell_count(self, grid: GridArchive):
@@ -107,6 +109,7 @@ class TestGridArchive:
 # CVTArchive
 # ---------------------------------------------------------------------------
 
+
 class TestCVTArchive:
     def test_basic(self):
         np.random.seed(42)
@@ -148,6 +151,7 @@ class TestCVTArchive:
 # CVT utilities
 # ---------------------------------------------------------------------------
 
+
 class TestCVT:
     def test_closest_centroid(self):
         centroids = np.array([[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]])
@@ -166,6 +170,7 @@ class TestCVT:
 # ---------------------------------------------------------------------------
 # Selector
 # ---------------------------------------------------------------------------
+
 
 class TestSelector:
     @pytest.fixture
@@ -249,6 +254,7 @@ class TestSelector:
 # Metrics
 # ---------------------------------------------------------------------------
 
+
 class TestMetrics:
     def test_coverage(self, grid: GridArchive):
         assert coverage(grid) == 0.0
@@ -273,6 +279,7 @@ class TestMetrics:
 # ---------------------------------------------------------------------------
 # Round-trip integration test
 # ---------------------------------------------------------------------------
+
 
 class TestRoundTrip:
     def test_add_select_metrics(self):

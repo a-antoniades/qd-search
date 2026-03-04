@@ -190,8 +190,12 @@ DATA_STRATEGY_FEATURE = Feature("data_strategy", 0, 4, num_bins=5)
 DEFAULT_FEATURES = [MODEL_FAMILY_FEATURE, DATA_STRATEGY_FEATURE]
 
 # Convenience lookups: bin index -> name
-MODEL_FAMILY_NAMES: dict[int, str] = {k: v["name"] for k, v in MODEL_FAMILY_KEYWORDS.items()}
-DATA_STRATEGY_NAMES: dict[int, str] = {k: v["name"] for k, v in DATA_STRATEGY_KEYWORDS.items()}
+MODEL_FAMILY_NAMES: dict[int, str] = {
+    k: v["name"] for k, v in MODEL_FAMILY_KEYWORDS.items()
+}
+DATA_STRATEGY_NAMES: dict[int, str] = {
+    k: v["name"] for k, v in DATA_STRATEGY_KEYWORDS.items()
+}
 
 
 # ---------------------------------------------------------------------------
