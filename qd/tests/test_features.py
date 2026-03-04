@@ -53,15 +53,21 @@ class TestModelFamily:
         assert features["model_family"] == 1.0
 
     def test_resnet_is_cnn(self):
-        features = extract_features("Use ResNet50 pretrained", "import torchvision.models.resnet")
+        features = extract_features(
+            "Use ResNet50 pretrained", "import torchvision.models.resnet"
+        )
         assert features["model_family"] == 2.0  # CNN
 
     def test_efficientnet_is_cnn(self):
-        features = extract_features("EfficientNet-B4", "model = timm.create_model('efficientnet_b4')")
+        features = extract_features(
+            "EfficientNet-B4", "model = timm.create_model('efficientnet_b4')"
+        )
         assert features["model_family"] == 2.0
 
     def test_lstm_is_rnn(self):
-        features = extract_features("BiLSTM model", "nn.LSTM(hidden_size=256, bidirectional=True)")
+        features = extract_features(
+            "BiLSTM model", "nn.LSTM(hidden_size=256, bidirectional=True)"
+        )
         assert features["model_family"] == 3.0  # RNN
 
     def test_gru_is_rnn(self):
@@ -76,7 +82,9 @@ class TestModelFamily:
         assert features["model_family"] == 4.0  # Transformer
 
     def test_deberta_is_transformer(self):
-        features = extract_features("DeBERTa-v3", "from transformers import DebertaV2Model")
+        features = extract_features(
+            "DeBERTa-v3", "from transformers import DebertaV2Model"
+        )
         assert features["model_family"] == 4.0
 
     def test_ensemble_stacking(self):
@@ -87,11 +95,15 @@ class TestModelFamily:
         assert features["model_family"] == 5.0  # Ensemble
 
     def test_random_forest_is_classical(self):
-        features = extract_features("Random Forest", "RandomForestClassifier(n_estimators=100)")
+        features = extract_features(
+            "Random Forest", "RandomForestClassifier(n_estimators=100)"
+        )
         assert features["model_family"] == 0.0  # Classical ML
 
     def test_logistic_is_classical(self):
-        features = extract_features("LogisticRegression", "from sklearn.linear_model import LogisticRegression")
+        features = extract_features(
+            "LogisticRegression", "from sklearn.linear_model import LogisticRegression"
+        )
         assert features["model_family"] == 0.0
 
     def test_default_on_empty(self):
@@ -113,7 +125,9 @@ class TestModelFamily:
 
 class TestDataStrategy:
     def test_train_test_split_is_simple(self):
-        features = extract_features("", "from sklearn.model_selection import train_test_split")
+        features = extract_features(
+            "", "from sklearn.model_selection import train_test_split"
+        )
         assert features["data_strategy"] == 0.0  # Simple
 
     def test_kfold_is_cv(self):
@@ -217,7 +231,9 @@ class TestGridArchiveIntegration:
 
         f1 = extract_features("XGBoost", "import xgboost")
         f2 = extract_features("ResNet CNN", "import torchvision\nresnet\nconv2d")
-        f3 = extract_features("BERT transformer", "from transformers import AutoModel\nbert\nbert")
+        f3 = extract_features(
+            "BERT transformer", "from transformers import AutoModel\nbert\nbert"
+        )
 
         archive.add("s1", fitness=0.8, features=f1)
         archive.add("s2", fitness=0.7, features=f2)
