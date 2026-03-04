@@ -1,0 +1,6 @@
+_target_: dojo.config_dataclasses.client.base.ClientConfig
+api: litellm
+model_id: gemini/gemini-3-flash-preview
+base_url: ""
+use_azure_client: false
+provider: gemini

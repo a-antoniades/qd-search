@@ -1,0 +1,11 @@
+# MAP-Elites diversity-aware node selector
+# Uses a GridArchive (model_family x data_strategy = 30 cells) to promote
+# diverse exploration via quality-diversity selection policies
+
+_target_: dojo.config_dataclasses.selector.mapelites.MAPElitesSelectorConfig
+
+selector_type: mapelites
+selection_policy: tournament  # tournament | roulette | random | best
+seed: 42
+fallback_to_fitness: true
+verbose: false

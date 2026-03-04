@@ -1,0 +1,8 @@
+# Fitness-based node selector
+# Uses softmax-weighted sampling based on normalized fitness scores
+# This preserves the original EVO solver selection behavior
+
+_target_: dojo.config_dataclasses.selector.fitness.FitnessSelectorConfig
+
+selector_type: fitness
+verbose: false

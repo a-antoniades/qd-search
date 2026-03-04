@@ -1,0 +1,8 @@
+# EVO solver with MAP-Elites selector for diversity-aware selection
+# Extends mlebench/evo with MAP-Elites selector override
+
+defaults:
+  - mlebench/evo
+  - override /selector: mapelites
+
+# No other overrides needed - inherits everything from mlebench/evo

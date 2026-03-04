@@ -1,0 +1,26 @@
+# RLM-based intelligent node selector
+# Uses iterative LLM analysis to select nodes for expansion
+# Pipeline: identify candidates → summarize approaches → compare semantically → decide
+
+_target_: dojo.config_dataclasses.selector.rlm.RLMSelectorConfig
+
+selector_type: rlm
+
+# RLM backend configuration
+backend: gemini
+model_name: gemini-3-flash-preview  # upgraded from gemini-2.0-flash
+api_key_env: GEMINI_API_KEY
+
+# RLM execution parameters
+# 6 iterations for full pipeline: candidates → summaries → pairs → evaluate → decide → return
+max_iterations: 6
+timeout: 120
+
+# Context configuration
+# Reduced from 100 to 50 since we include fuller plan text (3000 chars vs 300)
+max_nodes: 50
+full_context: true  # true = all data with full plans, false = just essentials
+
+# Fallback behavior
+fallback_to_fitness: true
+verbose: true  # Enable to see iteration traces

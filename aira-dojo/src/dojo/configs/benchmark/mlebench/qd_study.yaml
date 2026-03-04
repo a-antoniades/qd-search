@@ -1,0 +1,10 @@
+_target_: dojo.config_dataclasses.benchmark.BenchmarkConfig
+
+name: mlebench
+tasks:
+  - tabular-playground-series-dec-2021
+  - spooky-author-identification
+  - dog-breed-identification
+  - learning-agency-lab-automated-essay-scoring-2
+  - stanford-covid-vaccine
+  - google-research-identify-contrails-reduce-global-warming

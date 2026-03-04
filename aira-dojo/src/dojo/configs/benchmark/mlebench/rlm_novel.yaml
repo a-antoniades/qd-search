@@ -1,0 +1,8 @@
+_target_: dojo.config_dataclasses.benchmark.BenchmarkConfig
+
+name: mlebench
+tasks:
+  - seti-breakthrough-listen
+  - hms-harmful-brain-activity-classification
+  - vesuvius-challenge-ink-detection
+  - ventilator-pressure-prediction

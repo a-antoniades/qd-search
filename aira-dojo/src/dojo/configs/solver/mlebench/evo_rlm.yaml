@@ -1,0 +1,8 @@
+# EVO solver with RLM selector for intelligent node selection
+# Extends mlebench/evo with RLM selector override
+
+defaults:
+  - mlebench/evo
+  - override /selector: rlm
+
+# No other overrides needed - inherits everything from mlebench/evo

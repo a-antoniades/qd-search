@@ -1,0 +1,29 @@
+# @package _global_
+# EVO + RLM selector experiment config
+# For testing heuristic-free crossover selection
+defaults:
+  - override /interpreter: python
+  - override /solver: mlebench/evo
+  - override /solver/client@solver.operators.analyze.llm.client: gdm
+  - override /solver/client@solver.operators.debug.llm.client: gdm
+  - override /solver/client@solver.operators.draft.llm.client: gdm
+  - override /solver/client@solver.operators.improve.llm.client: gdm
+  - override /solver/client@solver.operators.crossover.llm.client: gdm
+  - override /selector@solver.selector: rlm
+
+solver:
+  num_generations: 2
+  individuals_per_generation: 3
+  num_islands: 1
+  crossover_prob: 0.5
+  num_generations_till_crossover: 1
+  execution_timeout: 600
+  use_test_score: true
+  selector:
+    verbose: true
+
+metadata:
+  git_issue_id: EVO_RLM_TEST
+
+vars:
+  metadata.seed: [1]
