@@ -1,7 +1,5 @@
 """Tests for qd.features — keyword-based feature extraction."""
 
-import pytest
-
 from qd.features import (
     DATA_STRATEGY_KEYWORDS,
     DEFAULT_FEATURES,
