@@ -44,8 +44,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -e qd/[test]
-      - run: pytest qd/tests/ -v
+      - run: pip install numpy pytest
+      - run: PYTHONPATH=. pytest qd/tests/ -v
 
   ai-review:
     if: github.event_name == 'pull_request'
