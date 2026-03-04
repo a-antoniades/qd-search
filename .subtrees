@@ -1,0 +1,7 @@
+# Upstream sources for vendored repositories
+# Format: directory upstream-url branch commit-at-import
+aira-dojo git@github.com:facebookresearch/aira-dojo.git main 4e88583
+aideml git@github.com:WecoAI/aideml.git main 9643875
+omni-epic git@github.com:maxencefaldor/omni-epic.git main af2a3c6
+science-codeevolve git@github.com:inter-co/science-codeevolve.git main 4261a5c
+Automated-AI-Researcher https://github.com/NoviScl/Automated-AI-Researcher.git main 4e33561

@@ -45,6 +45,9 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
+# API Keys
+gemini-keys.txt
+
 # Misc
 *.log
 wandb/
