@@ -6,9 +6,7 @@ aira-dojo/sif/
 Automated-AI-Researcher/data/
 Automated-AI-Researcher/runs/
 science-codeevolve/science-codeevolve-experiments/
-experiments/*/runs/
-experiments/*/data/
-experiments/*/figures/
+experiments/
 
 # Claude Code worktrees
 .claude/worktrees/
