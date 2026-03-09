@@ -91,6 +91,14 @@ def update_database(run_name = "GRPO-env-test", epoch_num = 0, output_dir="runs"
     with open(ideas_path, "r") as f:
         ideas_lst = json.load(f)
 
+    ## load lineage metadata (parent tracking, mode, model, timestamp)
+    metadata_path = os.path.join(run_dir, "ideas", f"ideas_epoch{epoch_num}_metadata.json")
+    if os.path.exists(metadata_path):
+        with open(metadata_path, "r") as f:
+            metadata_lst = json.load(f)
+    else:
+        metadata_lst = None
+
     ## read ranked ideas directly from ranked_ideas.json instead of recomputing
     base_idea_dir = os.path.join(run_dir, "training_logs", f"epoch{epoch_num}") + "/"
     ranked_path = os.path.join(base_idea_dir, "ranked_ideas.json")
@@ -115,7 +123,7 @@ def update_database(run_name = "GRPO-env-test", epoch_num = 0, output_dir="runs"
                     }
                 elif "nanogpt" in run_name.lower():
                     ## skip reward hacking examples
-                    if reward_value is None or (isinstance(reward_value, float) and math.isnan(reward_value)) or reward_value < 2.5:
+                    if reward_value is None or (isinstance(reward_value, float) and math.isnan(reward_value)) or reward_value < 0.5:
                         continue
                     idea_dp = {
                         "epoch": epoch_num,
@@ -123,13 +131,15 @@ def update_database(run_name = "GRPO-env-test", epoch_num = 0, output_dir="runs"
                         "idea": ideas_lst[idea_id],
                         "lowest_val_loss": reward_value if reward_value is not None else -999,
                     }
-                # elif "nanogpt" in run_name.lower():
-                #     idea_dp = {
-                #         "epoch": epoch_num,
-                #         "idea_id": idea_id,
-                #         "idea": ideas_lst[idea_id],
-                #         "fastest_time_to_target": reward_value if reward_value is not None else -999,
-                #     }
+
+                # Merge lineage metadata if available
+                if metadata_lst is not None and idea_id < len(metadata_lst):
+                    meta = metadata_lst[idea_id]
+                    idea_dp["mode"] = meta.get("mode")
+                    idea_dp["parent_ids"] = meta.get("parent_ids", [])
+                    idea_dp["model_name"] = meta.get("model_name")
+                    idea_dp["timestamp"] = meta.get("timestamp")
+
                 database_lst.append(idea_dp)
 
     # Remove duplicates: keep only the best entry for each (epoch, idea_id) pair
@@ -150,23 +160,6 @@ def update_database(run_name = "GRPO-env-test", epoch_num = 0, output_dir="runs"
             if metric_val is not None and not (isinstance(metric_val, float) and math.isnan(metric_val)):
                 if key not in unique_dict or metric_val < unique_dict[key][metric_key]:
                     unique_dict[key] = entry
-        # elif "nanogpt" in run_name.lower():
-        #     metric_key = "fastest_time_to_target"
-        #     # For NanoGPT, keep the entry with the lowest positive time_to_target (ignore -999 or <=0)
-        #     current_val = entry[metric_key]
-        #     prev_val = unique_dict[key][metric_key] if key in unique_dict else None
-        #     # Only consider positive values as valid
-        #     if current_val is not None and current_val > 0:
-        #         if (
-        #             key not in unique_dict
-        #             or prev_val is None
-        #             or prev_val <= 0
-        #             or current_val < prev_val
-        #         ):
-        #             unique_dict[key] = entry
-        #     # If no positive value has been seen yet, allow -999 as fallback
-        #     elif key not in unique_dict:
-        #         unique_dict[key] = entry
         else:
             # Default: just keep the first entry
             if key not in unique_dict:
@@ -187,11 +180,6 @@ def update_database(run_name = "GRPO-env-test", epoch_num = 0, output_dir="runs"
             deduped_database_lst,
             key=lambda x: float("inf") if x["lowest_val_loss"] is None or x["lowest_val_loss"] <= 0 else x["lowest_val_loss"]
         )
-    # elif "nanogpt" in run_name.lower():
-    #     ranked_database = sorted(
-    #         deduped_database_lst,
-    #         key=lambda x: float("inf") if x["fastest_time_to_target"] is None or x["fastest_time_to_target"] <= 0 else x["fastest_time_to_target"]
-    #     )
     else:
         # Default: sort by epoch and idea_id
         ranked_database = sorted(
@@ -220,18 +208,14 @@ def agent_call_idea_evolutionary_exploit(num_ideas = 10, idea_database = "ideas_
 
     if "grpo" in env_dir.lower():
         baseline_threshold = 0.49
-    # elif "nanogpt_1gpu" in env_dir.lower():
-    #     baseline_threshold = 3.63
     elif "nanogpt" in env_dir.lower():
-        baseline_threshold = 3.255
+        baseline_threshold = 1.0
 
     ## get all ideas above the baseline threshold
     if "grpo" in env_dir.lower():
         top_candidates = [idea_dict for idea_dict in idea_database_lst if idea_dict["best_eval_accuracy"] > baseline_threshold]
     elif "nanogpt" in env_dir.lower():
         top_candidates = [idea_dict for idea_dict in idea_database_lst if idea_dict["lowest_val_loss"] > 0 and idea_dict["lowest_val_loss"] < baseline_threshold]
-    # elif "nanogpt" in env_dir.lower():
-    #     top_candidates = [idea_dict for idea_dict in idea_database_lst if idea_dict["fastest_time_to_target"] > 0 and idea_dict["fastest_time_to_target"] < baseline_threshold]
 
     prev_ideas_prompt = ""
     # Sample top_k ideas from the candidates as the parent ideas
@@ -248,14 +232,7 @@ def agent_call_idea_evolutionary_exploit(num_ideas = 10, idea_database = "ideas_
     elif "nanogpt" in env_dir.lower():
         for idea_dict in sampled_ideas:
             prev_ideas_prompt += "Idea: " + idea_dict["idea"] + "\n"
-            prev_ideas_prompt += "Final Validation Loss: " + str(idea_dict["lowest_val_loss"]) + "\n\n"
-    # elif "nanogpt" in env_dir.lower():
-    #     for idea_dict in sampled_ideas:
-    #         prev_ideas_prompt += "Idea: " + idea_dict["idea"] + "\n"
-    #         if idea_dict["fastest_time_to_target"] < 0:
-    #             prev_ideas_prompt += "Fastest Time to Target: Either failed to execute or just never reached the target loss of 3.28 before timeout.\n\n"
-    #         else:
-    #             prev_ideas_prompt += "Fastest Time to Target: " + str(idea_dict["fastest_time_to_target"]) + "\n\n"
+            prev_ideas_prompt += "Final BPB (bits per byte): " + str(idea_dict["lowest_val_loss"]) + "\n\n"
 
     if "grpo" in env_dir.lower():
         # prompt = f"""
@@ -295,12 +272,13 @@ def agent_call_idea_evolutionary_exploit(num_ideas = 10, idea_database = "ideas_
         """
     elif "nanogpt" in env_dir.lower():
         prompt = f"""
-        I'm trying to optimize the training for the nanoGPT speedrun. The goal is to reach the lowest possible validation loss within one hour of wall clock time.
+        I'm trying to optimize training for the nanoGPT autoresearch speedrun. The goal is to reach the lowest possible BPB (bits per byte) within the time limit.
+        The model uses the autoresearch architecture: RoPE, squared ReLU, value embeddings, MuonAdamW optimizer, sliding window attention, and softcap logits.
         Below is the list of all code files in this codebase including the example script to launch a job:
         {context}\n\n
-        Below is the list of positive ideas that have been tried and their lowest validation loss in the end:
+        Below is the list of positive ideas that have been tried and their lowest BPB:
         {prev_ideas_prompt}
-        They all beat the baseline code that can reach the final validation loss of {baseline_threshold}.
+        They all beat the baseline code that can reach a final BPB of {baseline_threshold}.
         Now I want you to generate {num_ideas} ideas that directly improve upon these successful ideas.
         You should exploit good practices from the previous experiments, for example, by combining successful ideas, making refinement to them, etc.
         The goal is to generate {num_ideas} ideas that are even better than the previous ideas.
@@ -311,31 +289,9 @@ def agent_call_idea_evolutionary_exploit(num_ideas = 10, idea_database = "ideas_
         Make sure to elaborate on the full experiment details because the experiment executor does not have context of prior experiments.
         If the experiment involves changing any hyperparameters, you should specify the new values of the hyperparameters.
         External imports are not supported so you should suggest experiments that can be implemented by directly changing a few functions in the codebase.
-        Also note that you are not allowed to change any part of the evaluation logic, including the evaluation data and the evaluation metrics; and you are not allowed to change the eval frequency or the hard time limit set in the run_job.sh script.
-        You should absolutely not change the loss function part: loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1); or the validation hyperparameters including val_loss_every and val_tokens (we only do the valiation at the end of the training). You are not allowed to change the time limit of 3600 seconds in "if elapsed_time_seconds > 3600:" either. These must be left unchanged for fair comparison!
-        We have implemented functions like `forward_with_cache` and `forward_safe` in the codebase, these are meant to preserve the autoregressive nature of the model and avoid leaking information from future tokens during the validation step. You should not break the autoregressive nature of these functions.
+        Also note that you are not allowed to change any part of the evaluation logic, including the BPB computation, token_bytes loading, or the validation hyperparameters including val_loss_every and val_tokens (we only do the evaluation at the end of training). You are not allowed to change the time limit in "if elapsed_time_seconds > 1500:" either. These must be left unchanged for fair comparison!
         Also avoid any possible case of leaking information from future tokens that breaks the autoregressive nature of the model. For example, you should not mix in any future tokens into the current token's representation or normalize across the entire sequence.
         """
-    # elif "nanogpt" in env_dir.lower():
-    #     prompt = f"""
-    #     I'm trying to optimize the training speed for the nanoGPT speedrun. The goal is to reach the target loss of 3.28 as fast as possible.
-    #     Below is the list of all code files in this codebase including the example script to launch a job:
-    #     {context}\n\n
-    #     Below is the list of positive ideas that have been tried and their fastest time to reach the target:
-    #     {prev_ideas_prompt}
-    #     They all beat the baseline code that can reach the target loss in {baseline_threshold} ms.
-    #     Now I want you to generate {num_ideas} ideas that directly improve upon these successful ideas.
-    #     You should exploit good practices from the previous experiments, for example, by combining successful ideas, making refinement to them, etc.
-    #     The goal is to generate {num_ideas} ideas that are even better than the previous ideas.
-    #     For each experiment, include two sub-sections: (1) concise description of the experiment; (2) brief summary of the code changes needed. Format each block with the following tags:
-    #     [Experiment] ...
-    #     [Code Changes] ...
-    #     Add a tag [End] after each experiment.
-    #     Make sure to elaborate on the full experiment details because the experiment executor does not have context of prior experiments.
-    #     If the experiment involves changing any hyperparameters, you should specify the new values of the hyperparameters.
-    #     Also note that you are not allowed to change any part of the evaluation logic, including the evaluation data and the evaluation metrics; and you are not allowed to change the eval frequency or the hard time limit set in the run_job.sh script.
-    #     You should absolutely not change the loss function part: loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1); or the validation hyperparameters including val_loss_every and val_tokens. These must be left unchanged for fair comparison!
-    #     """
 
     if os.path.exists(cache_file):
         with open(cache_file, "r") as f:
@@ -426,22 +382,13 @@ def agent_call_idea_evolutionary_explore(num_ideas = 10, idea_database = "ideas_
             else:
                 prev_ideas_prompt += "Eval Accuracy: " + str(idea_dict["best_eval_accuracy"]) + "\n\n"
     elif "nanogpt" in env_dir.lower():
-        baseline_threshold = 3.255
+        baseline_threshold = 1.0
         for idea_dict in sampled_ideas:
             prev_ideas_prompt += "Idea: " + idea_dict["idea"] + "\n"
             if idea_dict["lowest_val_loss"] < 0:
-                prev_ideas_prompt += "Lowest Validation Loss: Failed to implement or execute\n\n"
+                prev_ideas_prompt += "Lowest BPB (bits per byte): Failed to implement or execute\n\n"
             else:
-                prev_ideas_prompt += "Lowest Validation Loss: " + str(idea_dict["lowest_val_loss"]) + "\n\n"
-    # elif "nanogpt" in env_dir.lower():
-    #     baseline_threshold = 2116778
-    #     for idea_dict in sampled_ideas:
-    #         prev_ideas_prompt += "Idea: " + idea_dict["idea"] + "\n"
-    #         if idea_dict["fastest_time_to_target"] < 0:
-    #             prev_ideas_prompt += "Fastest Time to Target: Either failed to execute or just never reached the target loss of 3.28 before timeout.\n\n"
-    #         else:
-    #             prev_ideas_prompt += "Fastest Time to Target: " + str(idea_dict["fastest_time_to_target"]) + "\n\n"
-
+                prev_ideas_prompt += "Lowest BPB (bits per byte): " + str(idea_dict["lowest_val_loss"]) + "\n\n"
 
     if "grpo" in env_dir.lower():
         # prompt = f"""
@@ -480,12 +427,13 @@ def agent_call_idea_evolutionary_explore(num_ideas = 10, idea_database = "ideas_
         """
     elif "nanogpt" in env_dir.lower():
         prompt = f"""
-        I'm trying to optimize the training loss for the nanoGPT speedrun. The goal is to reach the lowest possible validation loss within one hour of wall clock time.
+        I'm trying to optimize training for the nanoGPT autoresearch speedrun. The goal is to reach the lowest possible BPB (bits per byte) within the time limit.
+        The model uses the autoresearch architecture: RoPE, squared ReLU, value embeddings, MuonAdamW optimizer, sliding window attention, and softcap logits.
         Below is the list of all code files in this codebase including the example script to launch a job:
         {context}\n\n
-        Below is the list of all ideas that have been tried and their validation loss in the end:
+        Below is the list of all ideas that have been tried and their BPB:
         {prev_ideas_prompt}
-        For your reference, the baseline code can reach the a final validation loss of {baseline_threshold}.
+        For your reference, the baseline code can reach a final BPB of {baseline_threshold}.
         Now I want you to generate {num_ideas} brand new ideas that are different from all the previous ideas.
         You should explore novel ideas that have not been well-established in pretraining research yet. I'm looking for some clean and simple ideas instead of stacking many known tricks together or simply tweaking the hyperparameters.
         For each experiment, include two sub-sections: (1) concise description of the experiment; (2) brief summary of the code changes needed. Format each block with the following tags:
@@ -494,30 +442,9 @@ def agent_call_idea_evolutionary_explore(num_ideas = 10, idea_database = "ideas_
         Add a tag [End] after each experiment.
         If the experiment involves changing any hyperparameters, you should specify the new values of the hyperparameters.
         External imports are not supported so you should suggest experiments that can be implemented by directly changing a few functions in the codebase.
-        Also note that you are not allowed to change any part of the evaluation logic, including the evaluation data and the evaluation metrics; and you are not allowed to change the eval frequency or the hard time limit set in the run_job.sh script.
-        You should absolutely not change the loss function part: loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1); or the validation hyperparameters including val_loss_every and val_tokens (we only do the valiation at the end of the training). You are not allowed to change the time limit of 3600 seconds in "if elapsed_time_seconds > 3600:" either. These must be left unchanged for fair comparison!
+        Also note that you are not allowed to change any part of the evaluation logic, including the BPB computation, token_bytes loading, or the validation hyperparameters including val_loss_every and val_tokens (we only do the evaluation at the end of training). You are not allowed to change the time limit in "if elapsed_time_seconds > 1500:" either. These must be left unchanged for fair comparison!
         Also avoid any possible case of leaking information from future tokens that breaks the autoregressive nature of the model. For example, you should not mix in any future tokens into the current token's representation or normalize across the entire sequence.
-        We have implemented functions like `forward_with_cache` and `forward_safe` in the codebase, these are meant to preserve the autoregressive nature of the model and avoid leaking information from future tokens during the validation step. You should not break the autoregressive nature of these functions.
         """
-    # elif "nanogpt" in env_dir.lower():
-    #     prompt = f"""
-    #     I'm trying to optimize the training speed for the nanoGPT speedrun. The goal is to reach the target loss of 3.28 as fast as possible.
-    #     Below is the list of all code files in this codebase including the example script to launch a job:
-    #     {context}\n\n
-    #     Below is the list of all ideas that have been tried and their fastest time to reach the target:
-    #     {prev_ideas_prompt}
-    #     For your reference, the baseline code can reach the target loss in {baseline_threshold} ms.
-    #     Now I want you to generate {num_ideas} brand new ideas that are different from all the previous ideas.
-    #     Make sure to leverage some insights from the previous ideas by avoiding patterns that often lead to negative results.
-    #     You can also try out random ideas that have nothing to do with the previous ideas but you think are worth trying.
-    #     For each experiment, include two sub-sections: (1) concise description of the experiment; (2) brief summary of the code changes needed. Format each block with the following tags:
-    #     [Experiment] ...
-    #     [Code Changes] ...
-    #     Add a tag [End] after each experiment.
-    #     If the experiment involves changing any hyperparameters, you should specify the new values of the hyperparameters.
-    #     Also note that you are not allowed to change any part of the evaluation logic, including the evaluation data and the evaluation metrics; and you are not allowed to change the eval frequency or the hard time limit set in the run_job.sh script.
-    #     You should absolutely not change the loss function part: loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1); or the validation hyperparameters including val_loss_every and val_tokens. These must be left unchanged for fair comparison!
-    #     """
 
     if os.path.exists(cache_file):
         with open(cache_file, "r") as f:

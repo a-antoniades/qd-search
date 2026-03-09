@@ -81,37 +81,22 @@ def agent_call_idea_simple(num_ideas = 10, cache_file = "agent/all_ideas.json", 
     elif "nanogpt" in env_dir:
         prompt = f"""
         Below is the list of all code files in this codebase including the example script to launch a job:
-        {context}\n\nq
+        {context}\n\n
         I want you to think of {num_ideas} novel and simple ideas that involve modifying the codebase and running the corresponding experiments.
         I'm looking for experiments that involve some targeted changes to the codebase, for example, changing a few specific functions to implement a new idea or hypothesis.
-        You should include ideas that can improve the performance of the model or make the model train faster, for example, with a better architecture, learning rate schedule, optimizer, etc.
+        You should include ideas that can improve the model's BPB (bits per byte) or make training faster. The model uses the autoresearch architecture: RoPE, squared ReLU, value embeddings, MuonAdamW optimizer, sliding window attention, and softcap logits.
+        The evaluation metric is BPB (bits per byte), which is computed from per-token cross-entropy losses weighted by token byte lengths. Lower BPB is better. The baseline BPB is approximately 1.0.
         Now generate the list of {num_ideas} diverse experiments. For each experiment, include two sub-sections: (1) a short description of the idea; (2) a brief summary of the code changes needed. Format each block with the following tags:
         [Experiment] ...
         [Code Changes] ...
         Add a tag [End] after each experiment.
         Note that each experiment should only involve a single experiment (rather than doing multiple runs and making comparisons). If it involves setting any hyperparameters, you should specify the new values of the hyperparameters.
         Also note that you are not allowed to change any part of the evaluation logic, including the evaluation data and the evaluation metrics; and you are not allowed to change the eval frequency or the hard time limit set in the script.
-        We have implemented functions like `forward_with_cache` and `forward_safe` in the codebase, these are meant to preserve the autoregressive nature of the model and avoid leaking information from future tokens during the validation step. You should not break the autoregressive nature of these functions.
         External imports are not supported so you should suggest experiments that can be implemented by directly changing a few functions in the codebase.
-        You should absolutely not change the loss function part: loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1); or the validation hyperparameters including val_loss_every and val_tokens (we only do the valiation at the end of the training). You are not allowed to change the time limit in "if elapsed_time_seconds > 1500:" either. These must be left unchanged for fair comparison!
+        You should absolutely not change the BPB evaluation logic, the token_bytes loading, or the validation hyperparameters including val_loss_every and val_tokens (we only do the evaluation at the end of training). You are not allowed to change the time limit in "if elapsed_time_seconds > 1500:" either. These must be left unchanged for fair comparison!
+        Also avoid any possible case of leaking information from future tokens that breaks the autoregressive nature of the model.
         Now return the list of experiments with no other text.
         """
-    # elif "nanogpt" in env_dir:
-    #     prompt = f"""
-    #     Below is the list of all code files in this codebase including the example script to launch a job:
-    #     {context}\n\n
-    #     I want you to think of {num_ideas} experiments to run that involve modifying the codebase and running the corresponding experiments.
-    #     I'm looking for experiments that involve some targeted changes to the codebase, for example, changing a few specific functions to implement a new idea or hypothesis.
-    #     You should include ideas that might improve the performance of the model or make the model train faster, for example, with a better architecture, learning rate schedule, or optimizer.
-    #     Now generate the list of {num_ideas} diverse experiments. For each experiment, include two sub-sections: (1) a short description of the idea; (2) a brief summary of the code changes needed. Format each block with the following tags:
-    #     [Experiment] ...
-    #     [Code Changes] ...
-    #     Add a tag [End] after each experiment.
-    #     Note that each experiment should only involve a single experiment (rather than doing multiple runs and making comparisons). If it involves setting any hyperparameters, you should specify the new values of the hyperparameters.
-    #     Also note that you are not allowed to change any part of the evaluation logic, including the evaluation data and the evaluation metrics; and you are not allowed to change the eval frequency or the hard time limit set in the run_job.sh script.
-    #     You should absolutely not change the loss function part: loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1); or the validation hyperparameters including val_loss_every and val_tokens. These must be left unchanged for fair comparison!
-    #     Now return the list of experiments with no other text.
-    #     """
 
     if os.path.exists(cache_file):
         with open(cache_file, "r") as f:
@@ -337,16 +322,10 @@ def generate_code_diff(idea_idx = 6, base_dir = "env_grpo", variant_dir = "repo_
         """
     elif "nanogpt" in base_dir.lower():
         prompt += f"""
-        \nYou are not allowed to change the loss function part: loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1); or the validation hyperparameters including val_loss_every and val_tokens. You are not allowed to change the time limit of 1500 seconds in "if elapsed_time_seconds > 1500:" either. These must be left unchanged for fair comparison!
-        We have implemented functions like `forward_with_cache` and `forward_safe` in the codebase, these are meant to preserve the autoregressive nature of the model and avoid leaking information from future tokens during the validation step. You should not break the autoregressive nature of these functions.
+        \nYou are not allowed to change the BPB evaluation logic, the token_bytes loading, or the validation hyperparameters including val_loss_every and val_tokens. You are not allowed to change the time limit of 1500 seconds in "if elapsed_time_seconds > 1500:" either. These must be left unchanged for fair comparison!
         Avoid any possible case of leaking information from future tokens that breaks the autoregressive nature of the model. For example, you should not mix in any future tokens into the current token's representation or normalize across the entire sequence.
         Do not change the wandb name or project name.
         """
-    # elif "nanogpt" in base_dir.lower():
-    #     prompt += f"""
-    #     \nYou are not allowed to change the loss function part: loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1); or the validation hyperparameters including val_loss_every and val_tokens. These must be left unchanged for fair comparison!
-    #     Do not change the wandb name or project name.
-    #     """
 
     if prev_diff_file is not None:
         prev_diff_str = diff_prompt(prev_diff_file)
