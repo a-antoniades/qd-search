@@ -12,7 +12,7 @@ from agent.upload_repo_variants import zip_and_upload_repo_variants
 from agent.retrieve_training_logs import retrieve_training_logs
 from agent.evolutionary_search import update_database
 
-def collect_local_training_logs(repo_variants_dir, run_dir, epoch_num, target_loss=3.28):
+def collect_local_training_logs(repo_variants_dir, run_dir, epoch_num, target_loss=1.0):
     """Collect training logs locally instead of downloading from wandb.
 
     For local execution, output.log files are already on disk in the
@@ -127,10 +127,10 @@ if __name__ == "__main__":
     parser.add_argument("--continue_from_epoch", type=int, default=0)
     parser.add_argument("--skip_log_retrieval_when_continue", action="store_true")
     parser.add_argument("--skip_idea_generation_when_continue", action="store_true")
-    parser.add_argument("--run_name", type=str, default="nanogpt_claude_opus_bsz80")
-    parser.add_argument("--env_dir", type=str, default="env/nanogpt")
+    parser.add_argument("--run_name", type=str, default="nanogpt_autoresearch")
+    parser.add_argument("--env_dir", type=str, default="env/nanogpt_autoresearch")
     parser.add_argument("--entity", type=str, default="hashimoto-group")
-    parser.add_argument("--project", type=str, default="nanogpt_ES_claude")
+    parser.add_argument("--project", type=str, default="nanogpt_ES_autoresearch")
     parser.add_argument("--model_name", type=str, default="claude-opus-4-5")
     parser.add_argument("--local", action="store_true", help="Execute training locally instead of uploading to HuggingFace")
     parser.add_argument("--gpu_ids", type=str, default=None, help="Comma-separated GPU IDs for local execution (default: auto-detect free)")
@@ -139,6 +139,7 @@ if __name__ == "__main__":
     parser.add_argument("--wandb_sync_wait", type=int, default=60, help="Seconds to wait after local training for wandb sync (default: 60)")
     parser.add_argument("--wandb_min_completion", type=float, default=0.3, help="Fraction of runs required before proceeding with log retrieval (default: 0.3)")
     parser.add_argument("--gpus_per_job", type=int, default=1, help="Number of GPUs per training job for DDP (default: 1)")
+    parser.add_argument("--prompt_strategy", type=str, default="default", choices=["default", "structured_divergent"], help="Prompt strategy for epoch 0 idea generation (default: default)")
     parser.add_argument("--output_dir", type=str, default="runs", help="Base output directory for run artifacts (default: runs)")
     args = parser.parse_args()
 
@@ -155,7 +156,7 @@ if __name__ == "__main__":
         if epoch >= args.continue_from_epoch and not args.skip_idea_generation_when_continue:
             # generate ideas 
             print ("Sampling ideas for epoch ", epoch)
-            agent_call_idea(num_ideas = num_ideas_per_epoch, cache_file = f"{run_dir}/ideas/ideas_epoch{epoch}.json", run_name = run_name, epoch_num = epoch, prev_ideas_file = f"{run_dir}/ideas/ideas_epoch{epoch-1}.json", prev_training_logs = f"{run_dir}/training_logs/epoch{epoch-1}/", top_k=100, sample_k=100, env_dir=args.env_dir, model_name=args.model_name)
+            agent_call_idea(num_ideas = num_ideas_per_epoch, cache_file = f"{run_dir}/ideas/ideas_epoch{epoch}.json", run_name = run_name, epoch_num = epoch, prev_ideas_file = f"{run_dir}/ideas/ideas_epoch{epoch-1}.json", prev_training_logs = f"{run_dir}/training_logs/epoch{epoch-1}/", top_k=100, sample_k=100, env_dir=args.env_dir, model_name=args.model_name, prompt_strategy=args.prompt_strategy)
 
             # generate the code diff for each experiment
             print ("Generating code diffs for epoch ", epoch)

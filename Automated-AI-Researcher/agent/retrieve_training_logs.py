@@ -32,7 +32,7 @@ def extract_metrics(series, metric_name):
     filtered = series.dropna()
     return [{"step": int(idx), metric_name: float(val)} for idx, val in filtered.items()]
 
-def extract_metrics_nanogpt(lines, target_loss = 3.28):
+def extract_metrics_nanogpt(lines, target_loss = 1.0):
     eval_rewards = []
     time_to_target = -999
     for line in lines:
@@ -49,15 +49,6 @@ def extract_metrics_nanogpt(lines, target_loss = 3.28):
     return eval_rewards, time_to_target
 
 def get_run_name(run_name, epoch_num, idea_number = None):
-    # if "grpo" in run_name.lower() or "nanogpt_1gpu" in run_name.lower():
-    #     machine = "b200"
-    # elif "nanogpt" in run_name.lower():
-    #     machine = "h100"
-    # else:
-    #     raise ValueError(f"Unknown run name: {run_name}")
-    #     machine = "h100"
-
-    ## all experiments are on b200 now 
     machine = "b200"
     if idea_number is None:
         name_pattern = f"{run_name}_epoch{epoch_num}_{machine}_idea_*"
@@ -150,8 +141,6 @@ def retrieve_training_logs(run_name, epoch_num, env_dir="env_nanogpt", entity="h
                 final_eval_reward = max([r["eval_reward"] for r in eval_rewards])
             elif "nanogpt" in run_name.lower():
                 final_eval_reward = min([r["val_loss"] for r in eval_rewards])
-            # elif "nanogpt" in run_name.lower():
-            #     final_eval_reward = time_to_target
         else:
             final_eval_reward = -999.0  # or None, but -inf sorts to bottom
 
@@ -193,6 +182,6 @@ def retrieve_training_logs(run_name, epoch_num, env_dir="env_nanogpt", entity="h
 if __name__ == "__main__":
     run_name = "nanogpt_finaleval"
     epoch_num = 0
-    num_ideas, ranked_ideas_dicts = retrieve_training_logs(run_name, epoch_num, env_dir="env/nanogpt", entity="hashimoto-group", project="nanogpt-training", target_loss=3.28)
+    num_ideas, ranked_ideas_dicts = retrieve_training_logs(run_name, epoch_num, env_dir="env/nanogpt", entity="hashimoto-group", project="nanogpt-training", target_loss=1.0)
     print(f"Number of ideas: {num_ideas}")
     print(f"Ranked ideas: {ranked_ideas_dicts}")
