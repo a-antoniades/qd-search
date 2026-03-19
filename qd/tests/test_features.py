@@ -54,39 +54,68 @@ class TestModelFamily:
         features = extract_features("", "import lightgbm as lgb\nlgb.LGBMClassifier()")
         assert features["model_family"] == 1.0
 
+    def test_mlp_is_dense(self):
+        features = extract_features(
+            "MLP model",
+            "model = nn.Sequential(nn.Linear(10, 64), nn.ReLU(), nn.Linear(64, 1))",
+        )
+        assert features["model_family"] == 2.0  # MLP/Dense
+
     def test_resnet_is_cnn(self):
         features = extract_features("Use ResNet50 pretrained", "import torchvision.models.resnet")
-        assert features["model_family"] == 2.0  # CNN
+        assert features["model_family"] == 3.0  # CNN
 
     def test_efficientnet_is_cnn(self):
         features = extract_features("EfficientNet-B4", "model = timm.create_model('efficientnet_b4')")
-        assert features["model_family"] == 2.0
+        assert features["model_family"] == 3.0
+
+    def test_swin_is_cnn(self):
+        features = extract_features("", "model = timm.create_model('swin_base')\nswin\nswin")
+        assert features["model_family"] == 3.0  # CNN (Swin has conv-like structure)
 
     def test_lstm_is_rnn(self):
         features = extract_features("BiLSTM model", "nn.LSTM(hidden_size=256, bidirectional=True)")
-        assert features["model_family"] == 3.0  # RNN
+        assert features["model_family"] == 4.0  # RNN
 
     def test_gru_is_rnn(self):
         features = extract_features("GRU-based approach", "nn.GRU(input_size=128)")
-        assert features["model_family"] == 3.0
+        assert features["model_family"] == 4.0
 
     def test_bert_is_transformer(self):
         features = extract_features(
             "Fine-tune BERT",
             "from transformers import AutoModel\nmodel = AutoModel.from_pretrained('bert-base')",
         )
-        assert features["model_family"] == 4.0  # Transformer
+        assert features["model_family"] == 5.0  # Transformer
 
     def test_deberta_is_transformer(self):
         features = extract_features("DeBERTa-v3", "from transformers import DebertaV2Model")
-        assert features["model_family"] == 4.0
+        assert features["model_family"] == 5.0
+
+    def test_gcn_is_gnn(self):
+        features = extract_features("", "from torch_geometric.nn import GCNConv\ngcn\ngcn")
+        assert features["model_family"] == 6.0  # GNN/Graph
+
+    def test_mamba_is_state_space(self):
+        features = extract_features(
+            "Use Mamba for sequence modeling", "from mamba_ssm import Mamba\nmamba\nmamba"
+        )
+        assert features["model_family"] == 7.0  # State-Space
+
+    def test_vae_is_generative(self):
+        features = extract_features("Train a VAE", "class VAE(nn.Module):\nvae\nvae")
+        assert features["model_family"] == 8.0  # Generative/EBM
+
+    def test_diffusion_is_generative(self):
+        features = extract_features("", "ddpm\ndiffusion\ndiffusion model")
+        assert features["model_family"] == 8.0
 
     def test_ensemble_stacking(self):
         features = extract_features(
             "Stacking ensemble of multiple models",
             "from sklearn.ensemble import StackingClassifier\nVotingClassifier",
         )
-        assert features["model_family"] == 5.0  # Ensemble
+        assert features["model_family"] == 9.0  # Ensemble
 
     def test_random_forest_is_classical(self):
         features = extract_features("Random Forest", "RandomForestClassifier(n_estimators=100)")
@@ -105,7 +134,7 @@ class TestModelFamily:
         plan = "CNN-based approach using ResNet"
         code = "resnet\nconv2d\nconv2d\nconv2d\nxgboost"
         features = extract_features(plan, code)
-        assert features["model_family"] == 2.0  # CNN wins by count
+        assert features["model_family"] == 3.0  # CNN wins by count
 
 
 # ---------------------------------------------------------------------------
@@ -150,6 +179,29 @@ class TestDataStrategy:
         features = extract_features("", "")
         assert features["data_strategy"] == 0.0  # Default: Simple
 
+    def test_pseudo_label_is_semi_supervised(self):
+        features = extract_features(
+            "Generate pseudo labels for unlabeled data",
+            "pseudo_label\npseudo_label\npseudo_label",
+        )
+        assert features["data_strategy"] == 5.0  # Semi/Self-Supervised
+
+    def test_contrastive_is_semi_supervised(self):
+        features = extract_features("", "simclr\ncontrastive\ncontrastive loss\nbyol")
+        assert features["data_strategy"] == 5.0
+
+    def test_smote_is_synthetic(self):
+        features = extract_features(
+            "", "from imblearn.over_sampling import SMOTE\nsmote\nsmote\noversample"
+        )
+        assert features["data_strategy"] == 6.0  # Synthetic Data
+
+    def test_albumentations_is_augmentation(self):
+        features = extract_features(
+            "", "import albumentations as A\nalbumentations\nalbumentations"
+        )
+        assert features["data_strategy"] == 2.0  # Augmentation
+
 
 # ---------------------------------------------------------------------------
 # extract_features — combined
@@ -174,7 +226,7 @@ class TestCombined:
             "augment"
         )
         features = extract_features(plan, code)
-        assert features["model_family"] == 2.0  # CNN
+        assert features["model_family"] == 3.0  # CNN
         # Augmentation has more hits than transfer learning here
         assert features["data_strategy"] == 2.0  # Augmentation
 
@@ -248,19 +300,19 @@ class TestGridArchiveIntegration:
 
 class TestKeywordCoverage:
     def test_all_model_bins_have_keywords(self):
-        for bin_idx in range(6):
+        for bin_idx in range(10):
             assert bin_idx in MODEL_FAMILY_KEYWORDS
             assert len(MODEL_FAMILY_KEYWORDS[bin_idx]["keywords"]) > 0
 
     def test_all_data_bins_have_keywords(self):
-        for bin_idx in range(5):
+        for bin_idx in range(7):
             assert bin_idx in DATA_STRATEGY_KEYWORDS
             assert len(DATA_STRATEGY_KEYWORDS[bin_idx]["keywords"]) > 0
 
     def test_default_features_dimensions(self):
         assert len(DEFAULT_FEATURES) == 2
-        assert DEFAULT_FEATURES[0].num_bins == 6
-        assert DEFAULT_FEATURES[1].num_bins == 5
-        # Total cells: 6 * 5 = 30
+        assert DEFAULT_FEATURES[0].num_bins == 10
+        assert DEFAULT_FEATURES[1].num_bins == 7
+        # Total cells: 10 * 7 = 70
         archive = GridArchive(DEFAULT_FEATURES)
-        assert archive.cell_count() == 30
+        assert archive.cell_count() == 70

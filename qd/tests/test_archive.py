@@ -102,6 +102,50 @@ class TestGridArchive:
         # Internally they should map to the same cell tuple.
         assert list(a._map.keys()) == list(b._map.keys())
 
+    def test_features_stored_in_elite(self, grid: GridArchive):
+        feats = {"x": 0.3, "y": 0.7}
+        grid.add("a", 1.0, feats)
+        elite = grid.elites()[0]
+        assert elite.features == feats
+
+    def test_minimize(self, grid_features):
+        archive = GridArchive(grid_features, maximize=False)
+        archive.add("a", 0.9, {"x": 0.1, "y": 0.2})
+        archive.add("b", 0.3, {"x": 0.1, "y": 0.2})  # lower is better
+        assert archive.elite_ids == ["b"]
+        # Higher fitness rejected
+        inserted = archive.add("c", 0.5, {"x": 0.1, "y": 0.2})
+        assert inserted is False
+        assert archive.elite_ids == ["b"]
+
+    def test_cell_visits_and_improvements(self, grid: GridArchive):
+        grid.add("a", 0.5, {"x": 0.1, "y": 0.2})  # insert (visit+improve)
+        grid.add("b", 0.3, {"x": 0.1, "y": 0.2})  # rejected (visit only)
+        grid.add("c", 0.9, {"x": 0.1, "y": 0.2})  # replace (visit+improve)
+        grid.add("d", 0.8, {"x": 0.9, "y": 0.9})  # new cell (visit+improve)
+
+        visits = grid.cell_visits()
+        improvements = grid.cell_improvements()
+        assert grid.total_visits == 4
+        # The cell containing x=0.1/y=0.2 had 3 visits, 2 improvements
+        cell_01 = grid._cell_index({"x": 0.1, "y": 0.2})
+        assert visits[cell_01] == 3
+        assert improvements[cell_01] == 2
+
+    def test_add_batch(self, grid: GridArchive):
+        results = grid.add_batch(
+            ids=["a", "b", "c"],
+            fitnesses=[0.5, 0.9, 0.3],
+            features_list=[
+                {"x": 0.1, "y": 0.2},
+                {"x": 0.1, "y": 0.2},  # same cell, better
+                {"x": 0.9, "y": 0.9},  # different cell
+            ],
+        )
+        assert results == [True, True, True]
+        assert grid.size == 2
+        assert set(grid.elite_ids) == {"b", "c"}
+
 
 # ---------------------------------------------------------------------------
 # CVTArchive
@@ -142,6 +186,37 @@ class TestCVTArchive:
             archive.add(f"s{i}", float(i), {"x": i / 10.0})
         # Expect most centroids to be occupied.
         assert archive.size >= 5
+
+    def test_features_stored(self):
+        np.random.seed(42)
+        feats = [Feature("x", 0.0, 1.0)]
+        archive = CVTArchive(feats, num_centroids=5, num_init_samples=200)
+        archive.add("a", 0.5, {"x": 0.3})
+        elite = archive.elites()[0]
+        assert elite.features == {"x": 0.3}
+
+    def test_minimize(self):
+        np.random.seed(42)
+        feats = [Feature("x", 0.0, 1.0)]
+        archive = CVTArchive(feats, num_centroids=5, num_init_samples=200, maximize=False)
+        archive.add("a", 0.9, {"x": 0.5})
+        archive.add("b", 0.3, {"x": 0.5})  # lower is better
+        assert archive.size == 1
+        assert archive.elite_ids == ["b"]
+
+    def test_cell_visits(self):
+        np.random.seed(42)
+        feats = [Feature("x", 0.0, 1.0)]
+        archive = CVTArchive(feats, num_centroids=5, num_init_samples=200)
+        archive.add("a", 0.5, {"x": 0.5})
+        archive.add("b", 0.3, {"x": 0.5})  # rejected
+        archive.add("c", 0.9, {"x": 0.5})  # replaces
+        assert archive.total_visits == 3
+        visits = archive.cell_visits()
+        improvements = archive.cell_improvements()
+        # Single cell visited 3 times with 2 improvements
+        assert sum(visits.values()) == 3
+        assert sum(improvements.values()) == 2
 
 
 # ---------------------------------------------------------------------------

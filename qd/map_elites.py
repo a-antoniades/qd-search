@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import math
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -41,17 +41,24 @@ class EliteEntry:
     Attributes:
         id: Caller-provided identifier for the solution.
         fitness: Fitness value of the solution.
+        features: Feature values that placed this solution in its cell.
     """
 
     id: str
     fitness: float
+    features: dict[str, float] = field(default_factory=dict)
 
 
 class Archive(ABC):
     """Abstract base class for a MAP-Elites archive."""
 
-    def __init__(self, features: list[Feature]) -> None:
+    def __init__(self, features: list[Feature], *, maximize: bool = True) -> None:
         self.features: list[Feature] = features
+        self.maximize: bool = maximize
+
+    def _is_better(self, new: float, old: float) -> bool:
+        """Return True if *new* fitness is better than *old*."""
+        return new > old if self.maximize else new < old
 
     @abstractmethod
     def add(self, id: str, fitness: float, features: dict[str, float]) -> bool:
@@ -66,6 +73,18 @@ class Archive(ABC):
             ``True`` if the solution was inserted (new cell or better fitness),
             ``False`` otherwise.
         """
+
+    def add_batch(
+        self,
+        ids: list[str],
+        fitnesses: list[float],
+        features_list: list[dict[str, float]],
+    ) -> list[bool]:
+        """Add multiple solutions. Returns list of booleans (inserted or not)."""
+        return [
+            self.add(id, fit, feat)
+            for id, fit, feat in zip(ids, fitnesses, features_list)
+        ]
 
     @abstractmethod
     def elites(self) -> list[EliteEntry]:
@@ -85,6 +104,19 @@ class Archive(ABC):
     def cell_count(self) -> int:
         """Total number of cells (occupied + empty)."""
 
+    @abstractmethod
+    def cell_visits(self) -> dict:
+        """Return mapping of cell → total visit count."""
+
+    @abstractmethod
+    def cell_improvements(self) -> dict:
+        """Return mapping of cell → improvement count."""
+
+    @property
+    def total_visits(self) -> int:
+        """Total number of add() calls across all cells."""
+        return sum(self.cell_visits().values())
+
 
 class GridArchive(Archive):
     """Fixed-grid MAP-Elites archive.
@@ -94,8 +126,8 @@ class GridArchive(Archive):
     solution mapped to that cell).
     """
 
-    def __init__(self, features: list[Feature]) -> None:
-        super().__init__(features)
+    def __init__(self, features: list[Feature], *, maximize: bool = True) -> None:
+        super().__init__(features, maximize=maximize)
         for f in self.features:
             if f.num_bins is None:
                 raise ValueError(
@@ -103,6 +135,8 @@ class GridArchive(Archive):
                 )
         self._num_cells: int = math.prod(f.num_bins for f in self.features)
         self._map: dict[tuple[int, ...], EliteEntry] = {}
+        self._visits: dict[tuple[int, ...], int] = {}
+        self._improvements: dict[tuple[int, ...], int] = {}
 
     def cell_count(self) -> int:
         return self._num_cells
@@ -118,7 +152,7 @@ class GridArchive(Archive):
             value = max(feat.min_val, min(value, feat.max_val))
             span = feat.max_val - feat.min_val
             proportion = (value - feat.min_val) / span if span > 0 else 0.0
-            idx = int(proportion * (feat.num_bins - 1))
+            idx = min(int(proportion * feat.num_bins), feat.num_bins - 1)
             indices.append(idx)
         return tuple(indices)
 
@@ -126,9 +160,11 @@ class GridArchive(Archive):
         cell = self._cell_index(features)
         if cell is None:
             return False
+        self._visits[cell] = self._visits.get(cell, 0) + 1
         existing = self._map.get(cell)
-        if existing is None or fitness > existing.fitness:
-            self._map[cell] = EliteEntry(id=id, fitness=fitness)
+        if existing is None or self._is_better(fitness, existing.fitness):
+            self._map[cell] = EliteEntry(id=id, fitness=fitness, features=features)
+            self._improvements[cell] = self._improvements.get(cell, 0) + 1
             return True
         return False
 
@@ -138,6 +174,12 @@ class GridArchive(Archive):
     def occupied_cells(self) -> list[tuple[tuple[int, ...], EliteEntry]]:
         """Return all occupied cells as (cell_index, elite) pairs."""
         return list(self._map.items())
+
+    def cell_visits(self) -> dict[tuple[int, ...], int]:
+        return dict(self._visits)
+
+    def cell_improvements(self) -> dict[tuple[int, ...], int]:
+        return dict(self._improvements)
 
     def __repr__(self) -> str:
         return f"GridArchive(cells={self._num_cells}, occupied={self.size})"
@@ -157,13 +199,17 @@ class CVTArchive(Archive):
         num_init_samples: int = 10_000,
         max_iter: int = 300,
         tolerance: float = 1e-6,
+        *,
+        maximize: bool = True,
     ) -> None:
-        super().__init__(features)
+        super().__init__(features, maximize=maximize)
         feature_bounds = [(f.min_val, f.max_val) for f in features]
         self.centroids: np.ndarray = cvt(
             num_centroids, num_init_samples, feature_bounds, max_iter, tolerance
         )
         self._map: dict[int, EliteEntry] = {}
+        self._visits: dict[int, int] = {}
+        self._improvements: dict[int, int] = {}
 
     def cell_count(self) -> int:
         return len(self.centroids)
@@ -177,14 +223,22 @@ class CVTArchive(Archive):
             point[i] = value
 
         idx = closest_centroid_idx(point, self.centroids)
+        self._visits[idx] = self._visits.get(idx, 0) + 1
         existing = self._map.get(idx)
-        if existing is None or fitness > existing.fitness:
-            self._map[idx] = EliteEntry(id=id, fitness=fitness)
+        if existing is None or self._is_better(fitness, existing.fitness):
+            self._map[idx] = EliteEntry(id=id, fitness=fitness, features=features)
+            self._improvements[idx] = self._improvements.get(idx, 0) + 1
             return True
         return False
 
     def elites(self) -> list[EliteEntry]:
         return list(self._map.values())
+
+    def cell_visits(self) -> dict[int, int]:
+        return dict(self._visits)
+
+    def cell_improvements(self) -> dict[int, int]:
+        return dict(self._improvements)
 
     def __repr__(self) -> str:
         return f"CVTArchive(centroids={len(self.centroids)}, occupied={self.size})"

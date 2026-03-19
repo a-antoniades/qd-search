@@ -1,8 +1,10 @@
 """Feature extraction for MAP-Elites: plan+code text -> feature descriptors.
 
 Classifies ML solutions along two dimensions:
-  - model_family (6 bins): Classical ML, GBDT, CNN, RNN, Transformer, Ensemble
-  - data_strategy (5 bins): Simple, K-Fold CV, Augmentation, Transfer Learning, Feature Eng.
+  - model_family (10 bins): Classical ML, GBDT, MLP/Dense, CNN, RNN, Transformer,
+    GNN/Graph, State-Space, Generative/EBM, Ensemble
+  - data_strategy (7 bins): Simple, K-Fold CV, Augmentation, Transfer Learning,
+    Feature Eng., Semi/Self-Supervised, Synthetic Data
 
 Extraction is purely keyword-based (no LLM calls), deterministic, and fast.
 """
@@ -37,6 +39,12 @@ MODEL_FAMILY_KEYWORDS: dict[int, dict] = {
             "kneighbors",
             "elasticnet",
             "adaboost",
+            "sgdclassifier",
+            "sgdregressor",
+            "gaussianprocess",
+            "linearregression",
+            "bayesianridge",
+            "perceptron",
         ],
     },
     1: {
@@ -51,14 +59,32 @@ MODEL_FAMILY_KEYWORDS: dict[int, dict] = {
             "xgb",
             "lgbm",
             "histgradientboosting",
+            "hist_gradient_boosting",
         ],
     },
     2: {
+        "name": "MLP/Dense",
+        "keywords": [
+            "mlp",
+            "nn.linear",
+            "nn.sequential",
+            "mlpclassifier",
+            "mlpregressor",
+            "dense layer",
+            "feedforward",
+            "fully connected",
+            "tabnet",
+            "tab_net",
+        ],
+    },
+    3: {
         "name": "CNN",
         "keywords": [
             "convnext",
             "resnet",
+            "resnext",
             "efficientnet",
+            "efficientnetv2",
             "vgg",
             "inception",
             "mobilenet",
@@ -69,9 +95,23 @@ MODEL_FAMILY_KEYWORDS: dict[int, dict] = {
             "deeplabv3",
             "segformer",
             "nn.conv",
+            "swin",
+            "senet",
+            "se_net",
+            "regnet",
+            "nfnet",
+            "maxvit",
+            "coatnet",
+            "squeezenet",
+            "shufflenet",
+            "yolo",
+            "detectron",
+            "faster_rcnn",
+            "mask_rcnn",
+            "retinanet",
         ],
     },
-    3: {
+    4: {
         "name": "RNN",
         "keywords": [
             "lstm",
@@ -84,7 +124,7 @@ MODEL_FAMILY_KEYWORDS: dict[int, dict] = {
             "nn.gru",
         ],
     },
-    4: {
+    5: {
         "name": "Transformer",
         "keywords": [
             "bert",
@@ -97,9 +137,74 @@ MODEL_FAMILY_KEYWORDS: dict[int, dict] = {
             "automodel",
             "autotokenizer",
             "distilbert",
+            "t5",
+            "electra",
+            "xlnet",
+            "albert",
+            "longformer",
+            "xlm",
+            "clip",
+            "dino",
         ],
     },
-    5: {
+    6: {
+        "name": "GNN/Graph",
+        "keywords": [
+            "gcn",
+            "gat",
+            "graph_conv",
+            "graphconv",
+            "message_passing",
+            "messagepassing",
+            "node2vec",
+            "graphsage",
+            "graph neural",
+            "graph network",
+            "torch_geometric",
+            "dgl",
+            "edge_conv",
+            "gin_conv",
+        ],
+    },
+    7: {
+        "name": "State-Space",
+        "keywords": [
+            "mamba",
+            "ssm",
+            "s4",
+            "state_space",
+            "state space",
+            "hyena",
+            "rwkv",
+            "linear_attention",
+            "linear attention",
+            "retnet",
+            "mamba_ssm",
+        ],
+    },
+    8: {
+        "name": "Generative/EBM",
+        "keywords": [
+            "vae",
+            "variational autoencoder",
+            "gan",
+            "generative adversarial",
+            "diffusion",
+            "energy_based",
+            "energy based",
+            "ebm",
+            "normalizing_flow",
+            "normalizing flow",
+            "score_matching",
+            "score matching",
+            "denoising_score",
+            "flow_matching",
+            "ddpm",
+            "ddim",
+            "stable_diffusion",
+        ],
+    },
+    9: {
         "name": "Ensemble",
         "keywords": [
             "stacking",
@@ -109,6 +214,7 @@ MODEL_FAMILY_KEYWORDS: dict[int, dict] = {
             "votingclassifier",
             "votingregressor",
             "stackingclassifier",
+            "stackingregressor",
         ],
     },
 }
@@ -133,6 +239,8 @@ DATA_STRATEGY_KEYWORDS: dict[int, dict] = {
             "cross-val",
             "cross_validation",
             "crossval",
+            "repeatedkfold",
+            "repeatedstratifiedkfold",
         ],
     },
     2: {
@@ -149,6 +257,18 @@ DATA_STRATEGY_KEYWORDS: dict[int, dict] = {
             "randomflip",
             "colorjitter",
             "randaugment",
+            "albumentations",
+            "imgaug",
+            "autoaugment",
+            "trivialaugment",
+            "randomresizedcrop",
+            "gaussianblur",
+            "randomgrayscale",
+            "randomrotation",
+            "horizontalflip",
+            "verticalflip",
+            "randomaffine",
+            "randomerasing",
         ],
     },
     3: {
@@ -162,6 +282,12 @@ DATA_STRATEGY_KEYWORDS: dict[int, dict] = {
             "imagenet",
             "from_pretrained",
             "timm.create_model",
+            "freeze",
+            "unfreeze",
+            "backbone",
+            "feature_extract",
+            "load_state_dict",
+            "torch.hub",
         ],
     },
     4: {
@@ -177,16 +303,60 @@ DATA_STRATEGY_KEYWORDS: dict[int, dict] = {
             "tfidfvectorizer",
             "polynomialfeatures",
             "word2vec",
+            "standardscaler",
+            "minmaxscaler",
+            "robustscaler",
+            "labelencoder",
+            "onehotencoder",
+            "ordinalencoder",
+            "target_encod",
+            "frequency_encod",
+            "get_dummies",
+        ],
+    },
+    5: {
+        "name": "Semi/Self-Supervised",
+        "keywords": [
+            "pseudo_label",
+            "pseudo label",
+            "pseudolabel",
+            "self_supervised",
+            "self-supervised",
+            "self supervised",
+            "contrastive",
+            "simclr",
+            "byol",
+            "moco",
+            "masked_autoencoder",
+            "mae",
+            "dino_loss",
+            "swav",
+            "barlow_twins",
+            "barlow twins",
+        ],
+    },
+    6: {
+        "name": "Synthetic Data",
+        "keywords": [
+            "smote",
+            "synthetic",
+            "oversample",
+            "oversampling",
+            "adasyn",
+            "llm_generate",
+            "paraphrase",
+            "data_generation",
+            "generate_samples",
         ],
     },
 }
 
 # ---------------------------------------------------------------------------
-# Feature definitions for GridArchive (30-cell grid: 6 x 5)
+# Feature definitions for GridArchive (70-cell grid: 10 x 7)
 # ---------------------------------------------------------------------------
 
-MODEL_FAMILY_FEATURE = Feature("model_family", 0, 5, num_bins=6)
-DATA_STRATEGY_FEATURE = Feature("data_strategy", 0, 4, num_bins=5)
+MODEL_FAMILY_FEATURE = Feature("model_family", 0, 9, num_bins=10)
+DATA_STRATEGY_FEATURE = Feature("data_strategy", 0, 6, num_bins=7)
 DEFAULT_FEATURES = [MODEL_FAMILY_FEATURE, DATA_STRATEGY_FEATURE]
 
 # Convenience lookups: bin index -> name
@@ -213,7 +383,7 @@ def extract_features(plan: str, code: str) -> dict[str, float]:
     Zero hits default to bin 0 (Classical ML / Simple).
 
     Returns:
-        Dict with ``"model_family"`` (0-5) and ``"data_strategy"`` (0-4),
+        Dict with ``"model_family"`` (0-9) and ``"data_strategy"`` (0-6),
         suitable for passing to ``GridArchive.add()``.
     """
     text = (plan or "") + "\n" + (code or "")
